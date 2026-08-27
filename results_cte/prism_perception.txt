@@ -1,0 +1,18 @@
+// Perception abstraction alpha — auto-generated from the confusion matrix
+// (rows sum to exactly 1; zero-probability branches omitted)
+[] cte=3 & v=1 & pc=1 -> 0.66: (cte_est'=3) & (pc'=2) +
+            0.325: (cte_est'=1) & (pc'=2) +
+            0.01: (cte_est'=0) & (pc'=2) +
+            0.005: (cte_est'=2) & (pc'=2);
+[] cte=1 & v=1 & pc=1 -> 0.0415: (cte_est'=3) & (pc'=2) +
+            0.7673: (cte_est'=1) & (pc'=2) +
+            0.1889: (cte_est'=0) & (pc'=2) +
+            0.0023: (cte_est'=4) & (pc'=2);
+[] cte=0 & v=1 & pc=1 -> 0.0419: (cte_est'=1) & (pc'=2) +
+            0.8513: (cte_est'=0) & (pc'=2) +
+            0.1068: (cte_est'=2) & (pc'=2);
+[] cte=2 & v=1 & pc=1 -> 0.0792: (cte_est'=0) & (pc'=2) +
+            0.8891: (cte_est'=2) & (pc'=2) +
+            0.0317: (cte_est'=4) & (pc'=2);
+[] cte=4 & v=1 & pc=1 -> 0.3333: (cte_est'=2) & (pc'=2) +
+            0.6667: (cte_est'=4) & (pc'=2);

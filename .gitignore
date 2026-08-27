@@ -1,0 +1,52 @@
+# ---------------------------------------------------------------- Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.ipynb_checkpoints/
+.venv/
+venv/
+env/
+
+# ---------------------------------------------------------------- Model weights
+# Regenerate with train_cte.py, or attach to a GitHub release.
+# Never commit these: they are tens to hundreds of MB and bloat history permanently.
+*.pth
+*.pt
+*.h5
+*.ckpt
+
+# Exception: the safety-case perception model is only ~1.5 MB. Commit it, so the
+# whole PRISM/guard/shift pipeline is reproducible without retraining or access
+# to the simulator. (The coursework checkpoints were 80-110 MB each - those are
+# the ones this rule exists to keep out.)
+!results_cte/cte_model.pth
+
+# ---------------------------------------------------------------- Collected data
+# Frames + cte_log.csv from collect_cte_data.py. Thousands of JPGs per track.
+# Regenerate by re-running collection against the simulator.
+data_cte/
+data/
+
+# ---------------------------------------------------------------- Large artefacts
+*.mp4
+*.avi
+*.npy
+*.npz
+
+# ---------------------------------------------------------------- Results
+# results_cte/ is committed by default because the small JSON/CSV/PRISM files
+# ARE the evidence base for the report. Only bulk artefacts are excluded above.
+# If a specific run folder is scratch, add it explicitly here, e.g.:
+# results_cte/scratch/
+
+# ---------------------------------------------------------------- Tooling
+.vscode/
+.idea/
+*.log
+!results_cte/**/*.log
+
+# ---------------------------------------------------------------- OS
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+.DS_Store

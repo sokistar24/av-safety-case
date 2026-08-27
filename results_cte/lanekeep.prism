@@ -1,0 +1,53 @@
+// Auto-generated lane-keeping DTMC (paper Appendix B.1 structure, CTE-only)
+// Perception probabilities measured from the trained model's confusion matrix.
+dtmc
+
+const int N; // finite time horizon (steps)
+
+module lanekeep
+
+  // true state: 0 LANE, 1 near-left, 3 far-left, 2 near-right, 4 far-right, -1 off-road
+  cte : [-1..4] init 0;
+  cte_est : [0..4] init 0;
+  v : [0..1] init 1;        // run-time check result (m1: always certified)
+  a : [0..2] init 0;        // 0 straight, 1 steer-left, 2 steer-right
+  pc : [0..5] init 0;       // 0 guard, 1 perception, 2 controller, 3 dynamics, 4 done, 5 error-halt
+  k : [1..N] init 1;
+
+  // run-time guard placeholder (m1: certify every input)
+  [] pc=0 -> 1: (v'=1) & (pc'=1);
+
+  // ---- perception: measured probabilistic abstraction (alpha) ----
+  [] cte=3 & v=1 & pc=1 -> 0.66: (cte_est'=3) & (pc'=2) + 0.325: (cte_est'=1) & (pc'=2) + 0.01: (cte_est'=0) & (pc'=2) + 0.005: (cte_est'=2) & (pc'=2);
+  [] cte=1 & v=1 & pc=1 -> 0.0415: (cte_est'=3) & (pc'=2) + 0.7673: (cte_est'=1) & (pc'=2) + 0.1889: (cte_est'=0) & (pc'=2) + 0.0023: (cte_est'=4) & (pc'=2);
+  [] cte=0 & v=1 & pc=1 -> 0.0419: (cte_est'=1) & (pc'=2) + 0.8513: (cte_est'=0) & (pc'=2) + 0.1068: (cte_est'=2) & (pc'=2);
+  [] cte=2 & v=1 & pc=1 -> 0.0792: (cte_est'=0) & (pc'=2) + 0.8891: (cte_est'=2) & (pc'=2) + 0.0317: (cte_est'=4) & (pc'=2);
+  [] cte=4 & v=1 & pc=1 -> 0.3333: (cte_est'=2) & (pc'=2) + 0.6667: (cte_est'=4) & (pc'=2);
+
+  // ---- controller: discretized P-controller ----
+  [] cte_est=0 & pc=2                 -> 1: (a'=0) & (pc'=3);
+  [] (cte_est=1 | cte_est=3) & pc=2   -> 1: (a'=2) & (pc'=3);
+  [] (cte_est=2 | cte_est=4) & pc=2   -> 1: (a'=1) & (pc'=3);
+
+  // ---- dynamics (deterministic; one state per step) ----
+  // a=0: hold position
+  [] pc=3 & k<N & a=0 -> 1: (pc'=0) & (k'=k+1);
+  // a=1: steer LEFT   (4->2->0->1->3->ERROR)
+  [] pc=3 & k<N & a=1 & cte=4 -> 1: (cte'=2) & (pc'=0) & (k'=k+1);
+  [] pc=3 & k<N & a=1 & cte=2 -> 1: (cte'=0) & (pc'=0) & (k'=k+1);
+  [] pc=3 & k<N & a=1 & cte=0 -> 1: (cte'=1) & (pc'=0) & (k'=k+1);
+  [] pc=3 & k<N & a=1 & cte=1 -> 1: (cte'=3) & (pc'=0) & (k'=k+1);
+  [] pc=3 & k<N & a=1 & cte=3 -> 1: (cte'=-1) & (pc'=5);          // off-road LEFT
+  // a=2: steer RIGHT  (3->1->0->2->4->ERROR)
+  [] pc=3 & k<N & a=2 & cte=3 -> 1: (cte'=1) & (pc'=0) & (k'=k+1);
+  [] pc=3 & k<N & a=2 & cte=1 -> 1: (cte'=0) & (pc'=0) & (k'=k+1);
+  [] pc=3 & k<N & a=2 & cte=0 -> 1: (cte'=2) & (pc'=0) & (k'=k+1);
+  [] pc=3 & k<N & a=2 & cte=2 -> 1: (cte'=4) & (pc'=0) & (k'=k+1);
+  [] pc=3 & k<N & a=2 & cte=4 -> 1: (cte'=-1) & (pc'=5);          // off-road RIGHT
+
+  // ---- termination (absorbing, avoids deadlocks) ----
+  [] pc=3 & k=N -> 1: (pc'=4);   // horizon reached, safe halt
+  [] pc=4 -> true;
+  [] pc=5 -> true;               // error halt (cte stays -1)
+
+endmodule
