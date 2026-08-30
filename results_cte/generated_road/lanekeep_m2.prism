@@ -1,0 +1,54 @@
+// Auto-generated lane-keeping DTMC WITH run-time guard (paper Appendix B.2, CTE-only)
+// Guard: MC-dropout uncertainty check; passes w.p. beta=0.0431; abort after M fails.
+// Perception probabilities measured on inputs that PASS the check (guarded alpha).
+dtmc
+
+const int N;        // finite time horizon (steps)
+const int M = 10;  // max consecutive failed checks before abort (fail-safe handover)
+
+module lanekeep
+
+  cte : [-1..4] init 0;
+  cte_est : [0..4] init 0;
+  v : [0..1] init 1;
+  a : [0..2] init 0;
+  pc : [0..5] init 0;
+  k : [1..N] init 1;
+  i : [0..M] init 0;   // consecutive failed-check counter
+
+  // ---- run-time guard: certify w.p. beta, else repeat the sensor reading ----
+  [] pc=0 & i<M -> 0.0431: (v'=1) & (pc'=1) & (i'=0) + 0.9569: (v'=0) & (i'=i+1);
+  // abort to fail-safe (the HANDOVER) after M consecutive failures - absorbing
+  [] pc=0 & i=M -> true;
+
+  // ---- perception: GUARDED alpha (inputs that pass the uncertainty check) ----
+  [] cte=3 & v=1 & pc=1 -> 0.2: (cte_est'=3) & (pc'=2) + 0.2: (cte_est'=1) & (pc'=2) + 0.2: (cte_est'=0) & (pc'=2) + 0.2: (cte_est'=2) & (pc'=2) + 0.2: (cte_est'=4) & (pc'=2);
+  [] cte=1 & v=1 & pc=1 -> 0.4284: (cte_est'=3) & (pc'=2) + 0.1429: (cte_est'=1) & (pc'=2) + 0.1429: (cte_est'=0) & (pc'=2) + 0.1429: (cte_est'=2) & (pc'=2) + 0.1429: (cte_est'=4) & (pc'=2);
+  [] cte=0 & v=1 & pc=1 -> 0.0159: (cte_est'=3) & (pc'=2) + 0.1746: (cte_est'=1) & (pc'=2) + 0.5873: (cte_est'=0) & (pc'=2) + 0.2063: (cte_est'=2) & (pc'=2) + 0.0159: (cte_est'=4) & (pc'=2);
+  [] cte=2 & v=1 & pc=1 -> 0.0244: (cte_est'=3) & (pc'=2) + 0.0244: (cte_est'=1) & (pc'=2) + 0.2195: (cte_est'=0) & (pc'=2) + 0.7073: (cte_est'=2) & (pc'=2) + 0.0244: (cte_est'=4) & (pc'=2);
+  [] cte=4 & v=1 & pc=1 -> 0.0204: (cte_est'=3) & (pc'=2) + 0.0204: (cte_est'=1) & (pc'=2) + 0.1429: (cte_est'=0) & (pc'=2) + 0.5102: (cte_est'=2) & (pc'=2) + 0.3061: (cte_est'=4) & (pc'=2);
+
+  // ---- controller: discretized P-controller (same as m1) ----
+  [] cte_est=0 & pc=2                 -> 1: (a'=0) & (pc'=3);
+  [] (cte_est=1 | cte_est=3) & pc=2   -> 1: (a'=2) & (pc'=3);
+  [] (cte_est=2 | cte_est=4) & pc=2   -> 1: (a'=1) & (pc'=3);
+
+  // ---- dynamics (same deterministic dynamics as m1) ----
+  [] pc=3 & k<N & a=0 -> 1: (pc'=0) & (k'=k+1);
+  [] pc=3 & k<N & a=1 & cte=4 -> 1: (cte'=2) & (pc'=0) & (k'=k+1);
+  [] pc=3 & k<N & a=1 & cte=2 -> 1: (cte'=0) & (pc'=0) & (k'=k+1);
+  [] pc=3 & k<N & a=1 & cte=0 -> 1: (cte'=1) & (pc'=0) & (k'=k+1);
+  [] pc=3 & k<N & a=1 & cte=1 -> 1: (cte'=3) & (pc'=0) & (k'=k+1);
+  [] pc=3 & k<N & a=1 & cte=3 -> 1: (cte'=-1) & (pc'=5);
+  [] pc=3 & k<N & a=2 & cte=3 -> 1: (cte'=1) & (pc'=0) & (k'=k+1);
+  [] pc=3 & k<N & a=2 & cte=1 -> 1: (cte'=0) & (pc'=0) & (k'=k+1);
+  [] pc=3 & k<N & a=2 & cte=0 -> 1: (cte'=2) & (pc'=0) & (k'=k+1);
+  [] pc=3 & k<N & a=2 & cte=2 -> 1: (cte'=4) & (pc'=0) & (k'=k+1);
+  [] pc=3 & k<N & a=2 & cte=4 -> 1: (cte'=-1) & (pc'=5);
+
+  // ---- termination (absorbing) ----
+  [] pc=3 & k=N -> 1: (pc'=4);
+  [] pc=4 -> true;
+  [] pc=5 -> true;
+
+endmodule

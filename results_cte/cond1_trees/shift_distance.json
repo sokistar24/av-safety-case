@@ -1,0 +1,17 @@
+{
+  "pixel_js_bits": 0.04357559809737625,
+  "mahalanobis": {
+    "id_median": 1.982510212715795,
+    "shift_median": 2.8174474633131683,
+    "id_mean": 2.5819756716769233,
+    "shift_mean": 3.7033254265425035,
+    "auroc": 0.6550642658972247
+  },
+  "feature_sym_kl_nats": 2.2140578111328906,
+  "corr_maha_mcstd": {
+    "ID": 0.8018299035125215,
+    "shifted": 0.7008509328570535
+  },
+  "id_dir": "data_cte/generated_track",
+  "shift_dir": "data_cte/cond1_trees"
+}

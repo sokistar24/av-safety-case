@@ -5,6 +5,30 @@
   "M": 10,
   "acc_all": 0.8132845188284519,
   "acc_guarded": 0.8180242634315424,
+  "min_count": 30,
+  "row_status": {
+    "3": {
+      "n": 85,
+      "status": "estimated"
+    },
+    "1": {
+      "n": 381,
+      "status": "estimated"
+    },
+    "0": {
+      "n": 735,
+      "status": "estimated"
+    },
+    "2": {
+      "n": 441,
+      "status": "estimated"
+    },
+    "4": {
+      "n": 89,
+      "status": "estimated"
+    }
+  },
+  "n_passing_onroad": 1731,
   "state_order": [
     3,
     1,

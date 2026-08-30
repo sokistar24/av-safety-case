@@ -1,0 +1,17 @@
+{
+  "pixel_js_bits": 0.2347414259239998,
+  "mahalanobis": {
+    "id_median": 1.982510212715795,
+    "shift_median": 7.198976160581265,
+    "id_mean": 2.5819756716769233,
+    "shift_mean": 7.68512776365439,
+    "auroc": 0.9538134132373868
+  },
+  "feature_sym_kl_nats": 30.21229531593781,
+  "corr_maha_mcstd": {
+    "ID": 0.8018299035125215,
+    "shifted": 0.4867520003860811
+  },
+  "id_dir": "data_cte/generated_track",
+  "shift_dir": "data_cte/mini_monaco"
+}

@@ -94,12 +94,22 @@ def main():
         data = json.load(f)
     if args.guarded:
         counts = np.array(data["guarded_counts"], dtype=float)
+        stored_probs = data.get("guarded_probs")
         beta, M = float(data["beta"]), int(data.get("M", 10))
         tag = args.tag or "m2"
     else:
         counts = np.array(data["alpha_counts"], dtype=float)
+        stored_probs = data.get("alpha_probs")
         beta, M = None, 10
         tag = args.tag or "m1"
+
+    status = data.get("row_status")
+    if status:
+        weak = [k for k, v in status.items() if v["status"] != "estimated"]
+        if weak:
+            print(f"NOTE: rows {', '.join(weak)} are weakly identified "
+                  f"(n < {data.get('min_count', '?')} passing samples).")
+            print("      Their intervals will be wide; that width is the result.")
 
     os.makedirs(args.out_dir, exist_ok=True)
     tmpdir = tempfile.mkdtemp(prefix="boot_")
@@ -111,10 +121,19 @@ def main():
         with open(prop_path, "w", encoding="utf-8") as f:
             f.write("P=? [ F cte=-1 ]\n")
 
-    # point estimate first
-    row_sums = counts.sum(axis=1, keepdims=True)
-    point_probs = np.divide(counts, row_sums, out=np.zeros_like(counts),
-                            where=row_sums > 0)
+    # Point estimate: use exactly the probabilities written into the model that
+    # was verified, so the reported point matches the checked artifact. Fall back
+    # to normalising the counts, filling any all-zero row with a uniform
+    # distribution rather than leaving it empty (an empty row would emit a PRISM
+    # command with no transitions).
+    K = counts.shape[1]
+    if stored_probs is not None:
+        point_probs = np.array(stored_probs, dtype=float)
+    else:
+        row_sums = counts.sum(axis=1, keepdims=True)
+        point_probs = np.divide(counts, row_sums,
+                                out=np.full_like(counts, 1.0 / K),
+                                where=row_sums > 0)
     write_model(point_probs, model_path, args.guarded, beta, M)
     point = run_one(args.java, args.lib, model_path, prop_path, args.N)
     print(f"Point estimate (N={args.N}): {point:.6g}")

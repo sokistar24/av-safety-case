@@ -7,8 +7,15 @@ certify/repeat loop that aborts to a fail-safe (the handover) after M
 consecutive failed checks.
 
 Guard: an input PASSES if its MC-dropout std <= threshold, where the threshold
-is a percentile of the validation std distribution (--pct 80 -> beta ~= 0.80,
-comparable to the paper's 82.1% pass rate).
+is a percentile of the validation std distribution (--pct 80 -> beta ~= 0.80).
+For shift studies pass the ID-calibrated value explicitly with --threshold; never
+let the guard recalibrate itself on shifted data.
+
+Sparse rows: the guarded abstraction can only be estimated from inputs the guard
+admits, so under severe shift a correctly-firing guard leaves very few samples
+behind. Rows with fewer than --min_count passing samples are smoothed towards the
+Jeffreys prior; rows with none become uniform. Which rows were affected is
+recorded in guarded_alpha.json under "row_status".
 
 Reads:   results_cte/mc_val.csv          (from mc_uncertainty.py)
 Writes:  results_cte/lanekeep_m2.prism
@@ -94,6 +101,10 @@ def main():
                          "ID-calibrated value for shift studies)")
     ap.add_argument("--M", type=int, default=10,
                     help="consecutive failed checks before abort (paper: 10)")
+    ap.add_argument("--min_count", type=int, default=30,
+                    help="rows with fewer than this many passing samples are "
+                         "smoothed towards the Jeffreys prior instead of being "
+                         "reported as measured; 0 disables smoothing entirely")
     ap.add_argument("--out_dir", default="results_cte")
     args = ap.parse_args()
 
@@ -126,23 +137,50 @@ def main():
           f"passing inputs {acc_guarded*100:.2f}%")
 
     # guarded alpha from PASSING on-road samples only
+    #
+    # Sparse rows are a real problem under severe shift: a guard that correctly
+    # rejects almost everything leaves almost nothing to estimate the guarded
+    # abstraction from. Rows with few or no passing samples are smoothed towards
+    # the Jeffreys prior (Dirichlet(1/2,...,1/2)) rather than being asserted as
+    # measured. An empty row becomes uniform - "no information" - rather than the
+    # identity, which would assert PERFECT perception in exactly the state where
+    # perception is least supported by data.
+    K = len(ON_ROAD)
     i5 = {s: j for j, s in enumerate(ON_ROAD)}
-    counts = np.zeros((5, 5), dtype=int)
+    counts = np.zeros((K, K), dtype=int)
     for t, p in zip(t_states[passing & onroad], p_states[passing & onroad]):
         counts[i5[t], i5[p]] += 1
-    probs = np.zeros((5, 5))
+    probs = np.zeros((K, K))
+    row_status = {}
     print("\nGuarded alpha (row-normalized):")
     print("        " + "".join(f"{STATE_NAMES[s]:>9s}" for s in ON_ROAD))
     for s in ON_ROAD:
         r = counts[i5[s]]
-        if r.sum() == 0:
-            print(f"  WARNING: state {s} ({STATE_NAMES[s]}) has no passing samples; "
-                  f"using identity row.")
-            probs[i5[s], i5[s]] = 1.0
+        n = int(r.sum())
+        if n == 0:
+            # pure Jeffreys prior: uniform over the K estimated states
+            probs[i5[s]] = np.full(K, 1.0 / K)
+            status = "unestimated"
+        elif n < args.min_count:
+            # Jeffreys posterior mean: (r_k + 1/2) / (n + K/2)
+            probs[i5[s]] = (r + 0.5) / (n + K / 2.0)
+            status = "smoothed"
         else:
-            probs[i5[s]] = r / r.sum()
+            probs[i5[s]] = r / n
+            status = "estimated"
+        row_status[str(s)] = {"n": n, "status": status}
+        flag = {"unestimated": "  <- NO passing samples: uniform prior",
+                "smoothed": f"  <- n < {args.min_count}: Jeffreys-smoothed",
+                "estimated": ""}[status]
         print(f"{STATE_NAMES[s]:>7s} " + "".join(f"{v:9.3f}" for v in probs[i5[s]])
-              + f"   (n={r.sum()})")
+              + f"   (n={n}){flag}")
+
+    weak = [s for s in ON_ROAD if row_status[str(s)]["status"] != "estimated"]
+    if weak:
+        print("\n  NOTE: rows " + ", ".join(STATE_NAMES[s] for s in weak) +
+              " are not supported by sufficient passing samples.")
+        print("  The guarded model below is correspondingly weakly identified;")
+        print("  report these rows with their bootstrap intervals, not as point estimates.")
 
     # generate m2 model
     beta_r = round(beta, 4)
@@ -167,6 +205,8 @@ def main():
     with open(os.path.join(args.out_dir, "guarded_alpha.json"), "w") as f:
         json.dump({"threshold": threshold, "percentile": args.pct, "beta": beta,
                    "M": args.M, "acc_all": acc_all, "acc_guarded": acc_guarded,
+                   "min_count": args.min_count, "row_status": row_status,
+                   "n_passing_onroad": int((passing & onroad).sum()),
                    "state_order": ON_ROAD, "guarded_counts": counts.tolist(),
                    "guarded_probs": probs.tolist()}, f, indent=2)
 

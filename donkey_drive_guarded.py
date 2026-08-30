@@ -54,6 +54,14 @@ def main():
     ap.add_argument("--max_frames", type=int, default=6000)
     ap.add_argument("--out_dir", default="results_cte")
     ap.add_argument("--kp", type=float, default=0.95)
+    ap.add_argument("--fallback_kp", type=float, default=None,
+                    help="proportional gain for the fail-safe controller "
+                         "(default: same as --kp)")
+    ap.add_argument("--fallback_kd", type=float, default=0.0,
+                    help="derivative gain for the fail-safe controller. A P-only "
+                         "fail-safe oscillates around the target even with perfect "
+                         "state knowledge; damping it separates 'handover cannot "
+                         "help' from 'this fail-safe is under-designed'.")
     ap.add_argument("--lane_offset", type=float, default=-0.3)
     ap.add_argument("--throttle", type=float, default=0.1)
     ap.add_argument("--n_mc", type=int, default=15)
@@ -79,8 +87,11 @@ def main():
         model(torch.zeros(2, 3, IMG_H, IMG_W, device=device))
     model.load_state_dict(torch.load(args.ckpt, map_location=device))
     model.eval()
+    fb_kp = args.fallback_kp if args.fallback_kp is not None else args.kp
     print(f"Guard: std <= {thr:.4f}, M={M} fails -> handover, "
           f"R={args.handback} passes -> hand-back, fallback={args.fallback}")
+    print(f"Fail-safe controller: kp={fb_kp}, kd={args.fallback_kd}"
+          if args.fallback == "oracle" else "Fail-safe: stop")
 
     conf = {"exe_path": "remote", "host": args.host, "port": args.port}
     print(f"Connecting to sim on {args.host}:{args.port} as '{args.env}' ...")
@@ -100,6 +111,7 @@ def main():
     fail_count = 0
     pass_count = 0
     last_cert_steer = 0.0
+    prev_err = None
     n_handover = n_handback = 0
     first_handover = None
     stats = {"MODEL": {"n": 0, "cert": 0, "abscte": [], "off": 0},
@@ -162,11 +174,14 @@ def main():
             else:
                 mode = "FALLBACK"
                 if args.fallback == "oracle":
-                    steer = float(np.clip(-args.kp * (cte_true - args.lane_offset), -1, 1))
+                    err = cte_true - args.lane_offset
+                    derr = (err - prev_err) if prev_err is not None else 0.0
+                    steer = float(np.clip(-(fb_kp * err + args.fallback_kd * derr), -1, 1))
                     last_cert_steer = steer
                     throttle = args.throttle
                 else:
                     steer, throttle = 0.0, 0.0
+            prev_err = cte_true - args.lane_offset
 
             s = stats[mode]
             s["n"] += 1
