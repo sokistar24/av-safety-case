@@ -1,0 +1,51 @@
+{
+  "condition": "cond1_light",
+  "env": "donkey-generated-track-v0",
+  "sim_settings": {
+    "env": "donkey-generated-track-v0",
+    "seed": "20432814",
+    "toggles": {
+      "trees": "off",
+      "light": "ON",
+      "cones": "off"
+    }
+  },
+  "estimator": "deep_ensemble",
+  "K": 10,
+  "unguarded": true,
+  "threshold": 0.1923317313194275,
+  "M": 10,
+  "handback": 0,
+  "fallback": "oracle",
+  "fallback_kp": 5.0,
+  "fallback_kd": 5.0,
+  "frames": 159,
+  "laps_completed": 0,
+  "handovers": 0,
+  "handbacks": 0,
+  "first_handover": null,
+  "first_offroad": {
+    "t_s": 6.70117974281311,
+    "frame": 132,
+    "mode": "MODEL"
+  },
+  "counterfactual_handover": {
+    "t_s": 0.4992489814758301,
+    "frame": 9,
+    "abs_cte": 0.00479507446289063
+  },
+  "log": "results_de\\cond1_light\\live\\de_cond1_light_unguarded_20260913_002519.csv",
+  "timestamp": "20260913_002519",
+  "MODEL": {
+    "frames": 159,
+    "certified_pct": 7.547169811320755,
+    "mean_abs_cte": 1.2388229446965944,
+    "offroad_pct": 16.9811320754717
+  },
+  "FALLBACK": {
+    "frames": 0,
+    "certified_pct": null,
+    "mean_abs_cte": null,
+    "offroad_pct": null
+  }
+}

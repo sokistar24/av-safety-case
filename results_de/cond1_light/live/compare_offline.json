@@ -1,0 +1,39 @@
+{
+  "live": "results_de/cond1_light/live/de_cond1_light_unguarded_20260912_021843.csv",
+  "offline": "results_de/cond1_light/mc_shift.csv",
+  "threshold": 0.1923,
+  "bands": {
+    "on target": {
+      "live_n": 120,
+      "live_median_u": 0.25900999999999996,
+      "live_beta": 0.08333333333333333,
+      "offline_n": 4458,
+      "offline_median_u": 0.210665,
+      "offline_beta": 0.3584567070435173
+    },
+    "near": {
+      "live_n": 8,
+      "live_median_u": 0.54264,
+      "live_beta": 0.0,
+      "offline_n": 1494,
+      "offline_median_u": 0.33547499999999997,
+      "offline_beta": 0.06760374832663989
+    },
+    "far": {
+      "live_n": 6,
+      "live_median_u": 1.126605,
+      "live_beta": 0.0,
+      "offline_n": 454,
+      "offline_median_u": 0.6233,
+      "offline_beta": 0.0022026431718061676
+    },
+    "off road": {
+      "live_n": 26,
+      "live_median_u": 1.04738,
+      "live_beta": 0.11538461538461539,
+      "offline_n": 473,
+      "offline_median_u": 0.66714,
+      "offline_beta": 0.0613107822410148
+    }
+  }
+}

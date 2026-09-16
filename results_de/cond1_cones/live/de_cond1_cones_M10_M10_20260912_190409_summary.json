@@ -1,0 +1,47 @@
+{
+  "condition": "cond1_cones",
+  "env": "donkey-generated-track-v0",
+  "sim_settings": {
+    "env": "donkey-generated-track-v0",
+    "seed": "20432814",
+    "toggles": {
+      "trees": "off",
+      "light": "off",
+      "cones": "ON"
+    }
+  },
+  "estimator": "deep_ensemble",
+  "K": 10,
+  "unguarded": false,
+  "threshold": 0.1923317313194275,
+  "M": 10,
+  "handback": 0,
+  "fallback": "oracle",
+  "fallback_kp": 5.0,
+  "fallback_kd": 5.0,
+  "frames": 1702,
+  "laps_completed": 3,
+  "handovers": 1,
+  "handbacks": 0,
+  "first_handover": {
+    "t_s": 20.958012580871582,
+    "frame": 420,
+    "abs_cte": 1.38841736316681
+  },
+  "first_offroad": null,
+  "counterfactual_handover": null,
+  "log": "results_de\\cond1_cones\\live\\de_cond1_cones_M10_M10_20260912_190409.csv",
+  "timestamp": "20260912_190409",
+  "MODEL": {
+    "frames": 420,
+    "certified_pct": 95.95238095238095,
+    "mean_abs_cte": 0.5985695235420108,
+    "offroad_pct": 0.0
+  },
+  "FALLBACK": {
+    "frames": 1282,
+    "certified_pct": 95.08580343213728,
+    "mean_abs_cte": 0.3686417235546802,
+    "offroad_pct": 0.0
+  }
+}

@@ -1,0 +1,47 @@
+{
+  "condition": "mini_monaco",
+  "env": "donkey-minimonaco-track-v0",
+  "sim_settings": {
+    "env": "donkey-minimonaco-track-v0",
+    "seed": "20432814",
+    "toggles": {
+      "trees": "off",
+      "light": "off",
+      "cones": "off"
+    }
+  },
+  "estimator": "mc_dropout",
+  "n_mc": 30,
+  "unguarded": true,
+  "threshold": 0.28488600000000003,
+  "M": 10,
+  "handback": 0,
+  "fallback": "oracle",
+  "fallback_kp": 5.0,
+  "fallback_kd": 5.0,
+  "frames": 6000,
+  "laps_completed": 2,
+  "handovers": 0,
+  "handbacks": 0,
+  "first_handover": null,
+  "first_offroad": null,
+  "counterfactual_handover": {
+    "t_s": 0.47490382194519043,
+    "frame": 9,
+    "abs_cte": 1.9198169708252
+  },
+  "log": "results_cte\\mini_monaco\\live\\mc_mini_monaco_unguarded_m1test_20260913_022354.csv",
+  "timestamp": "20260913_022354",
+  "MODEL": {
+    "frames": 6000,
+    "certified_pct": 0.8500000000000001,
+    "mean_abs_cte": 1.0981798503498237,
+    "offroad_pct": 0.0
+  },
+  "FALLBACK": {
+    "frames": 0,
+    "certified_pct": null,
+    "mean_abs_cte": null,
+    "offroad_pct": null
+  }
+}

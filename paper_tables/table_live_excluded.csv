@@ -1,0 +1,8 @@
+arm,condition,policy,frames,laps,handovers,handover_frame,handover_abs_cte,cf_handover_frame,cf_handover_abs_cte,first_offroad_frame,first_offroad_mode,model_frames,model_certified_pct,model_offroad_pct,model_mean_abs_cte,fallback_frames,fallback_offroad_pct,fallback_mean_abs_cte,log,excluded_reason
+MC,road,M=10,4200,0,1,9,4.49820852279663,,,0,MODEL,9,0.0,100.0,4.4969060156080465,4191,1.5032211882605582,0.3622959083860282,mc_generated_road_M10_M10_20260913_010552.csv,off-road at frame 0: spawn artefact
+MC,road,unguarded,57,0,0,,,9,4.51475191116333,0,MODEL,57,17.543859649122805,100.0,5.359277398962723,0,,,mc_generated_road_unguarded_m1test_20260913_021335.csv,off-road at frame 0: spawn artefact
+DE,light,unguarded,152,0,0,,,,,0,MODEL,152,100.0,62.5,3.2238989754727014,0,,,de_cond1_light_unguarded_20260912_020754.csv,pre-fix unguarded logging: guard verdict forced to pass
+DE,light,unguarded,164,0,0,,,,,133,MODEL,164,100.0,18.902439024390244,1.3501046721528218,0,,,de_cond1_light_unguarded_20260912_020901.csv,pre-fix unguarded logging: guard verdict forced to pass
+DE,light,unguarded,161,0,0,,,,,134,MODEL,161,100.0,16.77018633540373,1.2217459987779582,0,,,de_cond1_light_unguarded_20260912_021024.csv,pre-fix unguarded logging: guard verdict forced to pass
+DE,light,unguarded,160,0,0,,,,,134,MODEL,160,100.0,16.25,1.1959643267095088,0,,,de_cond1_light_unguarded_20260912_021137.csv,pre-fix unguarded logging: guard verdict forced to pass
+DE,light,unguarded,160,0,0,,,,,134,MODEL,160,100.0,16.25,1.207421069778502,0,,,de_cond1_light_unguarded_20260912_021227.csv,pre-fix unguarded logging: guard verdict forced to pass
